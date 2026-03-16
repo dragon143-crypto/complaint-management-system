@@ -1,10 +1,5 @@
-import pyodbc
+import sqlite3
 
 def get_connection():
-    conn = pyodbc.connect(
-        "DRIVER={SQL Server};"
-        "SERVER=LAPTOP-QQOC2OUE;"
-        "DATABASE=StudentComplaintDB;"
-        "Trusted_Connection=yes;"
-    )
+    conn = sqlite3.connect("complaints.db", check_same_thread=False)
     return conn
