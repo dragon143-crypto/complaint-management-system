@@ -30,7 +30,7 @@ if not st.session_state.logged_in:
 
     st.title("🎓 Student Complaint Management System")
 
-    col1,col2,col3 = st.columns([1,2,1])
+    col1, col2, col3 = st.columns([1,2,1])
 
     with col2:
 
@@ -41,13 +41,12 @@ if not st.session_state.logged_in:
 
         if st.button("Login"):
 
-            query = f"""
+            query = """
             SELECT * FROM Users
-            WHERE username='{username}'
-            AND password='{password}'
+            WHERE username=? AND password=?
             """
 
-            user = pd.read_sql(query, conn)
+            user = pd.read_sql(query, conn, params=(username, password))
 
             if not user.empty:
 
@@ -63,7 +62,7 @@ if not st.session_state.logged_in:
     st.stop()
 
 # ---------------------
-# SIDEBAR BUTTONS
+# SIDEBAR NAVIGATION
 # ---------------------
 
 st.sidebar.title("Navigation")
@@ -134,7 +133,7 @@ elif menu == "Register":
 
         cursor.execute(
             "INSERT INTO Students(name,email,department) VALUES(?,?,?)",
-            name,email,dept
+            (name, email, dept)
         )
 
         conn.commit()
@@ -163,10 +162,10 @@ elif menu == "Submit":
 
         cursor.execute(
             """
-            INSERT INTO Complaints(tracking_id,student_id,category_id,complaint_text)
-            VALUES(?,?,?,?)
+            INSERT INTO Complaints(tracking_id,student_id,category_id,complaint_text,status)
+            VALUES(?,?,?,?,?)
             """,
-            tracking_id, student, category, complaint
+            (tracking_id, student, category, complaint, "Pending")
         )
 
         conn.commit()
@@ -185,13 +184,13 @@ elif menu == "Track":
 
     if track:
 
-        query = f"""
-        SELECT tracking_id,complaint_text,status,complaint_date
+        query = """
+        SELECT tracking_id, complaint_text, status, complaint_date
         FROM Complaints
-        WHERE tracking_id='{track}'
+        WHERE tracking_id=?
         """
 
-        df = pd.read_sql(query, conn)
+        df = pd.read_sql(query, conn, params=(track,))
 
         st.dataframe(df)
 
@@ -245,7 +244,7 @@ elif menu == "Admin":
 
         cursor.execute(
             "UPDATE Complaints SET status=? WHERE complaint_id=?",
-            status, cid
+            (status, cid)
         )
 
         conn.commit()
